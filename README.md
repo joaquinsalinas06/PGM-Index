@@ -21,3 +21,17 @@ con separación constante pueden describirse con una sola recta.
 El PGM está adaptado de [PGM-index](https://github.com/gvinciguerra/PGM-index),
 de Giorgio Vinciguerra (Apache-2.0), en particular `piecewise_linear_model.hpp`
 y `pgm_index.hpp`. Véase `LICENSE-PGM` para la licencia original.
+
+## PGM estático
+
+`PGMIndex(keys, eps)` recibe un vector ordenado de `unsigned long long`.
+El vector debe vivir más que el índice y no modificarse mientras se use.
+`lookup(x)` devuelve cuántas llaves son menores que `x`, igual que
+`std::lower_bound`; los duplicados se conservan. `approx(x)`
+da la predicción y la ventana `[lo, hi)` donde se corrige con búsqueda binaria.
+Si la respuesta es el final del vector, puede coincidir con `hi`.
+
+`ULLONG_MAX` está reservado para el centinela: se rechaza como dato, pero
+consultarlo devuelve el tamaño. Se valida el orden inicial, ε >= 1 y
+n <= INT_MAX. La búsqueda vacía y los extremos también están cubiertos.
+Por ahora los segmentos se localizan con búsqueda binaria en un único nivel.
