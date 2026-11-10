@@ -44,3 +44,14 @@ Se construyen hasta tener un solo segmento; la búsqueda baja desde la raíz.
 `seg_count()` cuenta segmentos producidos por el PLA del nivel base,
 sin los centinelas auxiliares. `size_in_bytes()` mide segmentos y offsets;
 `ram_bytes()` añade el objeto y la capacidad reservada, sin contar el vector externo.
+
+## B+ estático
+
+`StaticBPlusTree(keys, capacidad)` construye hojas y padres de abajo hacia arriba.
+Las hojas referencian páginas del vector externo: este debe mantenerse vivo
+e inmutable. Los nodos se liberan al destruir el árbol; no se permite copiarlo.
+`bytes` cuenta separadores y punteros internos; `ram_bytes` cuenta los nodos
+y sus vectores, sin los datos externos. `height` cuenta niveles internos.
+
+La carga masiva sigue el algoritmo de STX/TLX B+ tree
+([tlx/container/btree.hpp](https://github.com/tlx/tlx/blob/master/tlx/container/btree.hpp)).
