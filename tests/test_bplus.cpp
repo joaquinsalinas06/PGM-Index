@@ -18,10 +18,13 @@ int main() {
     StaticBPlusTree tree(keys, 4);
     assert(count_leaves(tree.root) == (n + 3) / 4);
     assert(tree.ram_bytes >= tree.bytes);
+    for (Key x = 0; x < Key(n + 2); ++x)
+      assert(tree.lookup(x) == std::lower_bound(keys.begin(), keys.end(), x) - keys.begin());
+    assert(tree.lookup(ULLONG_MAX) == n);
   }
   bool rejected = false;
   std::vector<Key> empty;
   try { StaticBPlusTree invalid(empty, 1); } catch (std::invalid_argument&) { rejected = true; }
   assert(rejected);
-  std::cout << "OK: construcción B+ estático\n";
+  std::cout << "OK: construcción y búsqueda B+ estático\n";
 }

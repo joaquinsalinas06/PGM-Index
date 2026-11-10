@@ -55,3 +55,6 @@ y sus vectores, sin los datos externos. `height` cuenta niveles internos.
 
 La carga masiva sigue el algoritmo de STX/TLX B+ tree
 ([tlx/container/btree.hpp](https://github.com/tlx/tlx/blob/master/tlx/container/btree.hpp)).
+
+`StaticBPlusTree::lookup(x)` devuelve la misma posición de `lower_bound`
+que el PGM, incluyendo la primera ocurrencia de una llave repetida.

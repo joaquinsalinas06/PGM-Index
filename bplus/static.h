@@ -47,6 +47,20 @@ struct StaticBPlusTree {
 
   ~StaticBPlusTree() { destroy(root); }
 
+  int lookup(Key x) {
+    if (!root)
+      return 0;
+    StaticBPlusNode* node = root;
+    while (!node->leaf) {
+      int child = lower_bound(node->keys.begin(), node->keys.end(), x) - node->keys.begin();
+      node = node->kids[child];
+    }
+    int n = data->size();
+    int end = min(n, node->start + cap);
+    return lower_bound(data->begin() + node->start, data->begin() + end, x) -
+           data->begin();
+  }
+
  private:
   vector<StaticBPlusNode*> build_leaves(vector<Key>& keys, vector<Key>& mins) {
     vector<StaticBPlusNode*> leaves;
