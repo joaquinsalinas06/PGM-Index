@@ -51,11 +51,10 @@ struct PGMIndex {
     if (key == ULLONG_MAX) return {n, n, n};
     Key k = max(first, key);
     int pos = predict(find_seg(k), k);
-    int lo = pos - eps, hi = pos + eps + 2;
+    int lo = pos - eps;
+    int hi = min<long long>(n, (long long)pos + eps + 2);
     if (lo < 0)
       lo = 0;
-    if (hi > n)
-      hi = n;
     return {pos, lo, hi};
   }
 

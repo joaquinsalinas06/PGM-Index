@@ -83,13 +83,6 @@ struct DynamicBPlusTree {
     if (x == ULLONG_MAX)
       throw invalid_argument("ULLONG_MAX esta reservado como centinela");
     if (n == INT_MAX) throw length_error("demasiadas llaves");
-    DynamicBPlusNode* node = root;
-    while (!node->leaf) {
-      if (int(node->kids.size()) == cap)
-        throw length_error("esta etapa no divide nodos internos llenos");
-      int child = lower_bound(node->keys.begin(), node->keys.end(), x) - node->keys.begin();
-      node = node->kids[child];
-    }
     Key sep;
     DynamicBPlusNode* right = insert_node(root, x, sep);
     n++;
@@ -155,7 +148,7 @@ struct DynamicBPlusTree {
       return nullptr;
     node->keys.insert(node->keys.begin() + child, child_sep);
     node->kids.insert(node->kids.begin() + child + 1, right);
-    return nullptr;
+    return (int)node->kids.size() > cap ? split_inner(node, sep) : nullptr;
   }
 
   DynamicBPlusNode* split_leaf(DynamicBPlusNode* leaf, Key& sep) {
@@ -165,6 +158,27 @@ struct DynamicBPlusTree {
     leaf->keys.resize(half);
     sep = leaf->keys.back();
     return right;
+  }
+
+  DynamicBPlusNode* split_inner(DynamicBPlusNode* node, Key& sep) {
+    int m = node->kids.size() / 2;
+    DynamicBPlusNode* right = new DynamicBPlusNode;
+    right->leaf = false;
+    right->kids.assign(node->kids.begin() + m, node->kids.end());
+    right->keys.assign(node->keys.begin() + m, node->keys.end());
+    sep = node->keys[m - 1];
+    node->kids.resize(m);
+    node->keys.resize(m - 1);
+    node->total = sum_keys(node);
+    right->total = sum_keys(right);
+    return right;
+  }
+
+  int sum_keys(DynamicBPlusNode* node) {
+    int sum = 0;
+    for (DynamicBPlusNode* kid : node->kids)
+      sum += kid->size();
+    return sum;
   }
 
   void grow_root(DynamicBPlusNode* right, Key sep) {

@@ -1,5 +1,7 @@
 #include <cassert>
 #include <iostream>
+#include <random>
+#include <type_traits>
 #include "../bplus/static.h"
 #include "../bplus/dynamic.h"
 
@@ -13,6 +15,7 @@ int count_leaves(StaticBPlusNode* node) {
 }
 
 int main() {
+  assert((!std::is_constructible_v<StaticBPlusTree, std::vector<Key>&&, int>));
   for (int n : {0, 1, 4, 5, 16, 17, 1000}) {
     std::vector<Key> keys(n);
     for (int i = 0; i < n; ++i) keys[i] = i / 3;
@@ -39,6 +42,51 @@ int main() {
     }
     assert(tree.height == 2);
   }
+  std::mt19937_64 rng(42);
+  for (int capacity : {4, 5, 16, 64}) {
+    for (int pattern = 0; pattern < 4; ++pattern) {
+      DynamicBPlusTree tree(capacity);
+      std::vector<Key> oracle;
+      for (Key i = 0; i < 3000; ++i) {
+        Key x = pattern == 0 ? i : pattern == 1 ? 3000 - i : pattern == 2 ? rng() % 30 : rng();
+        if (x == ULLONG_MAX) --x;
+        tree.insert(x);
+        oracle.insert(std::lower_bound(oracle.begin(), oracle.end(), x), x);
+        assert(tree.size() == int(oracle.size()) && tree.check());
+        for (Key q : {Key(0), x, x + 1, ULLONG_MAX - 1, ULLONG_MAX})
+          assert(tree.lookup(q) == std::lower_bound(oracle.begin(), oracle.end(), q) - oracle.begin());
+      }
+      StaticBPlusTree fixed(oracle, capacity);
+      for (Key x : oracle) assert(fixed.lookup(x) == tree.lookup(x));
+      bool rejected = false;
+      try { tree.insert(ULLONG_MAX); } catch (std::invalid_argument&) { rejected = true; }
+      assert(rejected && tree.size() == 3000 && tree.check());
+    }
+  }
+  {
+    std::vector<Key> oracle(1000);
+    for (int i = 0; i < 1000; ++i) oracle[i] = i / 3;
+    DynamicBPlusTree tree(oracle, 4);
+    for (int i = 0; i < 500; ++i) {
+      Key x = rng() % 500;
+      tree.insert(x);
+      oracle.insert(std::lower_bound(oracle.begin(), oracle.end(), x), x);
+      assert(tree.check() && tree.size() == int(oracle.size()));
+      for (Key q : {Key(0), x, x + 1, ULLONG_MAX - 1, ULLONG_MAX})
+        assert(tree.lookup(q) == std::lower_bound(oracle.begin(), oracle.end(), q) - oracle.begin());
+    }
+  }
+  for (auto keys : {std::vector<Key>{2, 1}, std::vector<Key>{ULLONG_MAX}}) {
+    bool rejected = false;
+    try { DynamicBPlusTree invalid(keys, 4); } catch (std::invalid_argument&) { rejected = true; }
+    assert(rejected);
+    rejected = false;
+    try { StaticBPlusTree invalid(keys, 4); } catch (std::invalid_argument&) { rejected = true; }
+    assert(rejected);
+  }
+  bool invalid_capacity = false;
+  try { DynamicBPlusTree invalid(1); } catch (std::invalid_argument&) { invalid_capacity = true; }
+  assert(invalid_capacity);
   bool rejected = false;
   std::vector<Key> empty;
   try { StaticBPlusTree invalid(empty, 1); } catch (std::invalid_argument&) { rejected = true; }

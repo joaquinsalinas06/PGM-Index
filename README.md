@@ -29,12 +29,13 @@ El vector debe vivir más que el índice y no modificarse mientras se use.
 `lookup(x)` devuelve cuántas llaves son menores que `x`, igual que
 `std::lower_bound`; los duplicados se conservan. `approx(x)`
 da la predicción y la ventana `[lo, hi)` donde se corrige con búsqueda binaria.
-Si la respuesta es el final del vector, puede coincidir con `hi`.
+Para una llave ausente, la respuesta puede coincidir con `hi`, incluido
+el final del vector.
 
 `ULLONG_MAX` está reservado para el centinela: se rechaza como dato, pero
 consultarlo devuelve el tamaño. Se valida el orden inicial, ε >= 1 y
-n <= INT_MAX. La búsqueda vacía y los extremos también están cubiertos.
-Por ahora los segmentos se localizan con búsqueda binaria en un único nivel.
+n <= INT_MAX y ε <= INT_MAX/4. La búsqueda vacía y los extremos también están cubiertos.
+Los segmentos se localizan descendiendo por los niveles recursivos.
 
 ### Niveles recursivos
 
@@ -71,6 +72,30 @@ incluye hojas y las llaves propias, por lo que no se debe sumar otro vector de d
 
 ### Inserción y hojas
 
-`insert(x)` conserva duplicados y divide las hojas llenas. En esta etapa
-se rechaza una inserción antes de modificar el árbol si encuentra un nodo
-interno lleno en el camino; la propagación interna se añade a continuación.
+`insert(x)` conserva duplicados y divide las hojas llenas. Las divisiones
+se propagan por los nodos internos hasta crear una nueva raíz si hace falta.
+No hay borrados ni estructuras auxiliares de sumas. Las operaciones de
+inserción no prometen recuperación ante agotamiento de memoria.
+
+## Cómo leer y probar
+
+1. `pgm/pla.h`: geometría y rectas con error acotado.
+2. `pgm/static.h`: el índice sobre un vector ordenado.
+3. `bplus/static.h`: un árbol construido de abajo hacia arriba.
+4. `bplus/dynamic.h`: hojas propias e inserciones con splits.
+
+Las pruebas comparan búsquedas con `std::lower_bound`, incluyendo vacío,
+duplicados, extremos, secuencias, separaciones constantes y saltos irregulares.
+El B+ dinámico se contrasta después de cada inserción, con capacidades pequeñas
+para forzar divisiones internas y crecimiento de raíz.
+
+Por ejemplo, para `{1, 2, 3, 5000}`, `lookup(5000)` devuelve 3. Después de
+insertar 4 en el B+ dinámico devuelve 4. El PGM y el B+ estáticos deben
+reconstruirse si se modifica su vector; sus métodos no permiten insertar.
+
+Esta entrega no necesita descargas ni dependencias de Python. No incorpora
+las variantes dinámicas del PGM: se entregan en un ZIP independiente.
+
+Los constructores estáticos rechazan vectores temporales para evitar referencias
+colgantes. No admiten copias; las estructuras con nodos liberan su memoria al salir
+de alcance. El PLA recibe puntos con llaves crecientes.

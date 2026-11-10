@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <random>
+#include <type_traits>
 #include "../pgm/static.h"
 
 void check_node(std::vector<Key> keys) {
@@ -26,6 +27,8 @@ void check_node(std::vector<Key> keys) {
 }
 
 int main() {
+  assert((!std::is_constructible_v<PGMIndex, std::vector<Key>&&, int>));
+
   check_node({}); check_node({0}); check_node({10}); check_node({1, 1, 1});
   check_node({0, 0, 1, 1, 2, 100, 100});
   check_node({ULLONG_MAX - 5, ULLONG_MAX - 2, ULLONG_MAX - 1});
@@ -43,6 +46,15 @@ int main() {
     if (kind < 2) assert(p.seg_count() == 1);
     if (kind == 2) { assert(p.seg_count() > 10); assert(p.height() > 1); }
   }
+  std::vector<Key> uniform(10000), duplicates(10000);
+  for (int i = 0; i < 10000; ++i) {
+    uniform[i] = rng() >> 1;
+    duplicates[i] = rng() % 32;
+  }
+  std::sort(uniform.begin(), uniform.end());
+  std::sort(duplicates.begin(), duplicates.end());
+  check_node(uniform); check_node(duplicates);
+  check_node(std::vector<Key>(1000, ULLONG_MAX - 1));
   for (auto keys : {std::vector<Key>{2, 1}, std::vector<Key>{1, ULLONG_MAX}}) {
     bool rejected = false;
     try { PGMIndex p(keys, 4); } catch (std::invalid_argument&) { rejected = true; }
