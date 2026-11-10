@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include "../bplus/static.h"
+#include "../bplus/dynamic.h"
 
 int count_leaves(StaticBPlusNode* node) {
   if (!node) return 0;
@@ -16,6 +17,10 @@ int main() {
     std::vector<Key> keys(n);
     for (int i = 0; i < n; ++i) keys[i] = i / 3;
     StaticBPlusTree tree(keys, 4);
+    DynamicBPlusTree dynamic(keys, 4);
+    assert(dynamic.size() == n && dynamic.check());
+    for (Key x = 0; x < Key(n + 2); ++x)
+      assert(dynamic.lookup(x) == std::lower_bound(keys.begin(), keys.end(), x) - keys.begin());
     assert(count_leaves(tree.root) == (n + 3) / 4);
     assert(tree.ram_bytes >= tree.bytes);
     for (Key x = 0; x < Key(n + 2); ++x)
@@ -26,5 +31,5 @@ int main() {
   std::vector<Key> empty;
   try { StaticBPlusTree invalid(empty, 1); } catch (std::invalid_argument&) { rejected = true; }
   assert(rejected);
-  std::cout << "OK: construcción y búsqueda B+ estático\n";
+  std::cout << "OK: construcción y búsqueda B+ estático y dinámico\n";
 }

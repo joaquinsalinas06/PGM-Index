@@ -58,3 +58,13 @@ La carga masiva sigue el algoritmo de STX/TLX B+ tree
 
 `StaticBPlusTree::lookup(x)` devuelve la misma posición de `lower_bound`
 que el PGM, incluyendo la primera ocurrencia de una llave repetida.
+
+## B+ dinámico
+
+`DynamicBPlusTree(keys, capacidad)` copia las llaves a sus propias hojas;
+`DynamicBPlusTree(capacidad)` empieza vacío. Requiere capacidad >= 4.
+`lookup(x)` devuelve el número de llaves menores que `x`, sumando tamaños
+de subárboles. `size()` devuelve el total y `check()` verifica orden,
+separadores, ocupación, profundidad y tamaños de subárboles.
+`size_in_bytes()` cuenta separadores y punteros internos; `ram_bytes()`
+incluye hojas y las llaves propias, por lo que no se debe sumar otro vector de datos.
