@@ -68,3 +68,9 @@ de subárboles. `size()` devuelve el total y `check()` verifica orden,
 separadores, ocupación, profundidad y tamaños de subárboles.
 `size_in_bytes()` cuenta separadores y punteros internos; `ram_bytes()`
 incluye hojas y las llaves propias, por lo que no se debe sumar otro vector de datos.
+
+### Inserción y hojas
+
+`insert(x)` conserva duplicados y divide las hojas llenas. En esta etapa
+se rechaza una inserción antes de modificar el árbol si encuentra un nodo
+interno lleno en el camino; la propagación interna se añade a continuación.

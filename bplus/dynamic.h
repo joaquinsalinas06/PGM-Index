@@ -79,6 +79,24 @@ struct DynamicBPlusTree {
     return rank + (lower_bound(node->keys.begin(), node->keys.end(), x) - node->keys.begin());
   }
 
+  void insert(Key x) {
+    if (x == ULLONG_MAX)
+      throw invalid_argument("ULLONG_MAX esta reservado como centinela");
+    if (n == INT_MAX) throw length_error("demasiadas llaves");
+    DynamicBPlusNode* node = root;
+    while (!node->leaf) {
+      if (int(node->kids.size()) == cap)
+        throw length_error("esta etapa no divide nodos internos llenos");
+      int child = lower_bound(node->keys.begin(), node->keys.end(), x) - node->keys.begin();
+      node = node->kids[child];
+    }
+    Key sep;
+    DynamicBPlusNode* right = insert_node(root, x, sep);
+    n++;
+    if (right)
+      grow_root(right, sep);
+  }
+
   long long size_in_bytes() { return measure(root, false); }
 
   long long ram_bytes() { return sizeof(*this) + measure(root, true); }
@@ -122,6 +140,41 @@ struct DynamicBPlusTree {
       parents.push_back(parent);
     }
     return parents;
+  }
+
+  DynamicBPlusNode* insert_node(DynamicBPlusNode* node, Key x, Key& sep) {
+    if (node->leaf) {
+      node->keys.insert(lower_bound(node->keys.begin(), node->keys.end(), x), x);
+      return (int)node->keys.size() > cap ? split_leaf(node, sep) : nullptr;
+    }
+    int child = lower_bound(node->keys.begin(), node->keys.end(), x) - node->keys.begin();
+    Key child_sep;
+    DynamicBPlusNode* right = insert_node(node->kids[child], x, child_sep);
+    node->total++;
+    if (!right)
+      return nullptr;
+    node->keys.insert(node->keys.begin() + child, child_sep);
+    node->kids.insert(node->kids.begin() + child + 1, right);
+    return nullptr;
+  }
+
+  DynamicBPlusNode* split_leaf(DynamicBPlusNode* leaf, Key& sep) {
+    DynamicBPlusNode* right = new DynamicBPlusNode;
+    int half = leaf->keys.size() / 2;
+    right->keys.assign(leaf->keys.begin() + half, leaf->keys.end());
+    leaf->keys.resize(half);
+    sep = leaf->keys.back();
+    return right;
+  }
+
+  void grow_root(DynamicBPlusNode* right, Key sep) {
+    DynamicBPlusNode* new_root = new DynamicBPlusNode;
+    new_root->leaf = false;
+    new_root->kids = {root, right};
+    new_root->keys = {sep};
+    new_root->total = root->size() + right->size();
+    root = new_root;
+    height++;
   }
 
   void destroy(DynamicBPlusNode* node) {

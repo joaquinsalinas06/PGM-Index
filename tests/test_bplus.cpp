@@ -27,6 +27,18 @@ int main() {
       assert(tree.lookup(x) == std::lower_bound(keys.begin(), keys.end(), x) - keys.begin());
     assert(tree.lookup(ULLONG_MAX) == n);
   }
+  {
+    DynamicBPlusTree tree(4);
+    std::vector<Key> oracle;
+    for (Key x : {Key(9), Key(1), Key(5), Key(5), Key(3), Key(7), Key(0), Key(10)}) {
+      tree.insert(x);
+      oracle.insert(std::lower_bound(oracle.begin(), oracle.end(), x), x);
+      assert(tree.check() && tree.size() == int(oracle.size()));
+      for (Key q = 0; q < 12; ++q)
+        assert(tree.lookup(q) == std::lower_bound(oracle.begin(), oracle.end(), q) - oracle.begin());
+    }
+    assert(tree.height == 2);
+  }
   bool rejected = false;
   std::vector<Key> empty;
   try { StaticBPlusTree invalid(empty, 1); } catch (std::invalid_argument&) { rejected = true; }
