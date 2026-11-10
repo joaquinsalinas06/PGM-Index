@@ -35,3 +35,12 @@ Si la respuesta es el final del vector, puede coincidir con `hi`.
 consultarlo devuelve el tamaño. Se valida el orden inicial, ε >= 1 y
 n <= INT_MAX. La búsqueda vacía y los extremos también están cubiertos.
 Por ahora los segmentos se localizan con búsqueda binaria en un único nivel.
+
+### Niveles recursivos
+
+Cada nivel superior indexa las llaves iniciales de los segmentos del inferior.
+Se construyen hasta tener un solo segmento; la búsqueda baja desde la raíz.
+`eps_rec` vale 4 por defecto. `height()` cuenta niveles y
+`seg_count()` cuenta segmentos producidos por el PLA del nivel base,
+sin los centinelas auxiliares. `size_in_bytes()` mide segmentos y offsets;
+`ram_bytes()` añade el objeto y la capacidad reservada, sin contar el vector externo.

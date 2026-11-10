@@ -60,9 +60,14 @@ struct PGMIndex {
   }
 
   int find_seg(Key key) {
-    auto end = segments.begin() + offsets[1];
-    return upper_bound(segments.begin(), end, key,
-                       [](Key x, Segment& s) { return x < s.key; }) - segments.begin() - 1;
+    int seg = offsets[offsets.size() - 2];
+    for (int level = height() - 2; level >= 0; --level) {
+      int candidate = max(0, predict(seg, key) - eps_rec - 1);
+      candidate += offsets[level];
+      while (segments[candidate + 1].key <= key) ++candidate;
+      seg = candidate;
+    }
+    return seg;
   }
 
   int predict(int seg_id, Key key) {
@@ -95,5 +100,13 @@ struct PGMIndex {
     base_segs = len;
     offsets.push_back(segments.size());
 
+    while (len > 1) {
+      int offset = offsets[offsets.size() - 2];
+      vector<Key> keys_up(len);
+      for (int i = 0; i < len; ++i) keys_up[i] = segments[offset + i].key;
+      PLA upper(eps_rec);
+      len = upper.make_segs(keys_up, data->back(), segments);
+      offsets.push_back(segments.size());
+    }
   }
 };

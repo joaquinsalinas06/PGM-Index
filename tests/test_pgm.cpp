@@ -41,7 +41,7 @@ int main() {
     check_node(keys);
     PGMIndex p(keys, 8);
     if (kind < 2) assert(p.seg_count() == 1);
-    if (kind == 2) assert(p.seg_count() > 10);
+    if (kind == 2) { assert(p.seg_count() > 10); assert(p.height() > 1); }
   }
   for (auto keys : {std::vector<Key>{2, 1}, std::vector<Key>{1, ULLONG_MAX}}) {
     bool rejected = false;
