@@ -1,0 +1,10 @@
+PGM-index: Giorgio Vinciguerra, Apache License 2.0.
+https://github.com/gvinciguerra/PGM-index
+
+pgm/pla.h y pgm/static.h están adaptados de piecewise_linear_model.hpp y
+pgm_index.hpp. Se agruparon los archivos, se eliminaron templates y se
+simplificaron funciones; se añadieron validaciones y consultas vacías.
+La licencia original está en LICENSE-PGM.
+
+La carga masiva del B+ estático sigue el algoritmo de STX/TLX B+ tree:
+https://github.com/tlx/tlx/blob/master/tlx/container/btree.hpp
