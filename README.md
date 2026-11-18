@@ -1,21 +1,21 @@
-# PGM-index y B+ tree
+# PGM-index y B+ tree: versión ampliada
 
 ## Integrantes:
 - Joaquin Mauricio Salinas Salas
 - Isaac Emanuel Javier Simeón Sarmiento
 - Adrian Antonio Auqui Perez
 
-Este proyecto fue hecho con C++ 17. Requiere Clang o GCC y Make. Hay que ejecutar `make test` para
+Proyecto en C++17. Requiere Clang o GCC y Make. Ejecuta `make test` para
 compilar y verificar; `make clean` elimina solamente los binarios de `build/`.
 Las pruebas usan `assert`: compilar sin `-DNDEBUG`.
 
-En esta entrega se presentan los algoritmos y pruebas de corrección. Los experimentos,
+Esta entrega contiene algoritmos y pruebas de corrección. Los experimentos,
 datasets, gráficas y benchmarks se preparan por separado.
 
 ## Geometría
 
 `pgm/pla.h` agrupa puntos, pendientes y segmentos. Las comparaciones usan
-`__int128`, que esta disponible en Clang y GCC para las llaves de 64 bits.
+`__int128`, disponible en Clang y GCC, para las llaves de 64 bits.
 
 ## Segmentación
 
@@ -88,6 +88,8 @@ inserción no prometen recuperación ante agotamiento de memoria.
 2. `pgm/static.h`: el índice sobre un vector ordenado.
 3. `bplus/static.h`: un árbol construido de abajo hacia arriba.
 4. `bplus/dynamic.h`: hojas propias e inserciones con splits.
+5. `pgm/buffered.h`: PGM con buffer ordenado.
+6. `pgm/logarithmic.h`: PGM por niveles.
 
 Las pruebas comparan búsquedas con `std::lower_bound`, incluyendo vacío,
 duplicados, extremos, secuencias, separaciones constantes y saltos irregulares.
@@ -98,6 +100,58 @@ Por ejemplo, para `{1, 2, 3, 5000}`, `lookup(5000)` devuelve 3. Después de
 insertar 4 en el B+ dinámico devuelve 4. El PGM y el B+ estáticos deben
 reconstruirse si se modifica su vector; sus métodos no permiten insertar.
 
+Esta entrega ampliada no necesita descargas ni dependencias de Python.
+Incluye las dos extensiones dinámicas del PGM junto a la base estática.
+
+## PGM dinámicos: dos formas de reutilizar el estático
+
+`BufferedPGM(keys, eps=64, capacity=256)` mantiene un PGM de la base y
+un buffer ordenado. `lookup(x)` suma los ranks de ambos. Cuando el buffer
+se llena, se fusiona con toda la base y se construye otro PGM. Es fácil de
+seguir, pero cada reconstrucción recorre toda la base y causa una pausa.
+El buffer admite inserciones entre consultas: no hace falta vaciarlo para leer.
+
+`LogarithmicPGM(keys, eps=64, capacity=256)` mantiene el mismo buffer y
+varios niveles de capacidad `capacity * 2^k`. Cada nivel no vacío tiene un PGM
+estático. Al llenarse el buffer se fusionan los niveles pequeños hasta encontrar
+capacidad suficiente. La búsqueda suma el rank de todos los niveles y del buffer.
+Así evita reconstruir siempre toda la base, a cambio de consultar varios índices.
+
+En ambos casos hay `insert(x)`, `lookup(x)`, `size()` y `check()`. Las llaves
+iniciales se copian: el vector del llamador puede cambiar o dejar de existir.
+Los duplicados se mantienen. No hay borrados, tombstones, Fenwick ni treap.
+Las pruebas fuerzan reconstrucciones y fusiones con capacidades pequeñas.
+
+### Ejemplo para seguir los cambios
+
+Con `{1, 2, 3, 5000}`, `lookup(5000)` es 3 en todas las estructuras.
+Con un buffer de capacidad 2, insertar 4 cambia inmediatamente la respuesta a 4,
+aunque el modelo de la base no cambia todavía. Insertar 5 llena el buffer:
+el PGM con buffer reconstruye las seis llaves; el logarítmico coloca las dos
+nuevas en el nivel pequeño disponible. Ambos devuelven ahora 5. El B+ actualiza
+sus hojas y divide los nodos que se llenen. Los estáticos necesitan reconstruirse.
+
+### Interfaz para preparar experimentos
+
+- Estáticos: `PGMIndex(keys, eps)` y `StaticBPlusTree(keys, capacidad)`.
+- Dinámicos: `BufferedPGM`, `LogarithmicPGM` y `DynamicBPlusTree`.
+- En todas las estructuras, buscar significa contar llaves estrictamente menores.
+- `seg_count()` suma segmentos base en los PGM dinámicos; el buffer sin
+  modelo no cuenta. En el logarítmico, `levels_used()` cuenta niveles ocupados;
+  no es la altura recursiva de un PGM. En el buffered, `height()` es la de la base.
+- `rebuilds` y `merges` cuentan mantenimientos. `moved_keys`
+  cuenta llaves escritas en el destino de cada mantenimiento; no todas las
+  copias intermedias ni el desplazamiento dentro del buffer.
+- `size_in_bytes()` cuenta segmentos y offsets. `ram_bytes()` incluye objetos,
+  vectores de datos, buffers e índices; excluye el overhead del asignador y el
+  pico temporal durante una reconstrucción. No son mediciones de RSS del proceso.
+- Los buffers son vectores ordenados: insertar desplaza hasta O(capacity) llaves.
+  La variante buffered paga además una reconstrucción completa cada lote;
+  no se le atribuyen los costos amortizados del método logarítmico.
+
+Los experimentos se preparan por separado. El repositorio no incluye benchmarks,
+datasets ni gráficas. Ejecuta `make test` para verificar los índices.
+
 Los constructores estáticos rechazan vectores temporales para evitar referencias
-colgantes. No se admiten copias; las estructuras con nodos liberan su memoria al salir
-de alcance.
+colgantes. Los estáticos no admiten copias, y los PGM dinámicos son propietarios
+de sus datos. El PLA recibe puntos con llaves crecientes.
