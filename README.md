@@ -1,16 +1,21 @@
 # PGM-index y B+ tree
 
-Proyecto en C++17. Requiere Clang o GCC y Make. Ejecuta `make test` para
+## Integrantes:
+- Joaquin Mauricio Salinas Salas
+- Isaac Emanuel Javier Simeón Sarmiento
+- Adrian Antonio Auqui Perez
+
+Este proyecto fue hecho con C++ 17. Requiere Clang o GCC y Make. Hay que ejecutar `make test` para
 compilar y verificar; `make clean` elimina solamente los binarios de `build/`.
 Las pruebas usan `assert`: compilar sin `-DNDEBUG`.
 
-Esta entrega contiene algoritmos y pruebas de corrección. Los experimentos,
+En esta entrega se presentan los algoritmos y pruebas de corrección. Los experimentos,
 datasets, gráficas y benchmarks se preparan por separado.
 
 ## Geometría
 
 `pgm/pla.h` agrupa puntos, pendientes y segmentos. Las comparaciones usan
-`__int128`, disponible en Clang y GCC, para las llaves de 64 bits.
+`__int128`, que esta disponible en Clang y GCC para las llaves de 64 bits.
 
 ## Segmentación
 
@@ -93,9 +98,6 @@ Por ejemplo, para `{1, 2, 3, 5000}`, `lookup(5000)` devuelve 3. Después de
 insertar 4 en el B+ dinámico devuelve 4. El PGM y el B+ estáticos deben
 reconstruirse si se modifica su vector; sus métodos no permiten insertar.
 
-Esta entrega no necesita descargas ni dependencias de Python. No incorpora
-las variantes dinámicas del PGM: se entregan en un ZIP independiente.
-
 Los constructores estáticos rechazan vectores temporales para evitar referencias
-colgantes. No admiten copias; las estructuras con nodos liberan su memoria al salir
-de alcance. El PLA recibe puntos con llaves crecientes.
+colgantes. No se admiten copias; las estructuras con nodos liberan su memoria al salir
+de alcance.
