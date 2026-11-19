@@ -1,0 +1,21 @@
+\section{Introducción}
+
+Un B$^+$ tree guarda información de la misma forma sin importar si las llaves siguen un patrón.
+Con llaves $a, a+1, \dots, a+n-1$ ocupa $\Theta(n)$ palabras, aunque la posición de cualquier
+llave se obtenga con una resta: $\mathrm{rank}(k) = k-a$. Los índices aprendidos~\cite{kraska2018}
+ven cada llave como el punto $(k, \mathrm{rank}(k))$ y aproximan esa función creciente. El
+PGM-index de Ferragina y Vinciguerra~\cite{ferragina2020pgm,ferragina2019arxiv} lo hace con
+garantías de peor caso. Para eso no entrena modelos: usa geometría computacional para calcular
+el menor número de segmentos que aproximan esa función con error a lo más $\varepsilon$.
+
+En el informe parcial nos comprometimos a implementar el PGM-index estático en C++ y a
+compararlo con un B$^+$ tree y con búsqueda binaria. Queríamos responder tres preguntas: qué tan
+compacta resulta su representación en la práctica y qué tan lejos queda el número de segmentos
+$m$ de la cota $n/(2\varepsilon)$, incluso en casos patológicos (P1); cómo influye $\varepsilon$
+en el espacio y en el tiempo de búsqueda (P2); y cuándo ofrece el PGM-index una ventaja práctica
+frente a las estructuras clásicas y cuándo esa ventaja se reduce (P3).
+
+En este informe final, la Sección~\ref{sec:teoria} explica por qué se cumplen las garantías del
+caso estático; la Sección~\ref{sec:impl} describe la implementación, que incluye además dos
+versiones dinámicas del índice; la Sección~\ref{sec:resultados} responde las tres preguntas con
+mediciones, y la Sección~\ref{sec:conclusiones} cierra con las conclusiones.

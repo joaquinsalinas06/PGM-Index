@@ -64,5 +64,9 @@ int main() {
   bool rejected = false;
   try { PGMIndex p(keys, 0); } catch (std::invalid_argument&) { rejected = true; }
   assert(rejected);
+  std::vector<Key> big(10000000);
+  for (int i = 0; i < 10000000; ++i) big[i] = Key(i) * 1000;
+  PGMIndex big_pgm(big, 64);
+  for (int i = 0; i < 10000000; i += 7) assert(big_pgm.lookup(big[i]) == i);
   std::cout << "OK: PGM frente a lower_bound y ventanas\n";
 }

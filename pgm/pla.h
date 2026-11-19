@@ -29,7 +29,7 @@ struct Segment {
 
   double predict(Key k) {
     Key dist = k - key;
-    return m * dist + b;
+    return (double)m * dist + b;
   }
 };
 

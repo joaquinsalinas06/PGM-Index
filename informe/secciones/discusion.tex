@@ -1,0 +1,19 @@
+\section{Conclusiones}
+\label{sec:conclusiones}
+
+En el parcial nos propusimos implementar el PGM-index estático y compararlo con un B$^+$ tree y
+con búsqueda binaria. Implementamos el PLA óptimo, el índice recursivo y los dos B$^+$, y los
+medimos sobre 14 conjuntos de datos. Sobre la compacidad (P1), la cota $m\le n/(2\varepsilon)$ se
+cumplió siempre. Con datos regulares el índice ocupa unos pocos KB para diez millones de llaves;
+solo los casos patológicos de cola pesada llegan a la mitad de la cota. Sobre $\varepsilon$ (P2),
+el espacio baja varios órdenes de magnitud al aumentarlo, pero el tiempo es mínimo entre
+$\varepsilon=16$ y 64. Con valores mayores domina la búsqueda final, y con valores menores el
+índice crece sin que la consulta mejore.
+
+Sobre la ventaja práctica (P3), con arreglos grandes ($n=10^7$) el PGM responde unas dos veces
+más rápido que el B$^+$ y que la búsqueda binaria, y ocupa cientos de veces menos que el B$^+$ en
+los datos regulares. La ventaja se reduce cuando las llaves tienen saltos de cola pesada, porque
+$m$ se acerca a la cota, y cuando el arreglo es chico ($n=10^5$). Además de lo
+propuesto, implementamos dos versiones dinámicas del índice. La de buffer busca algo más lento
+que el estático y conviene solo si las escrituras son raras. La logarítmica inserta a la par del
+B$^+$ dinámico, a cambio de búsquedas varias veces más lentas que las del estático.

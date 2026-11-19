@@ -1,0 +1,116 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot,es-noshorthands,es-tabla]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{url}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+\captionsetup{font=small,labelfont=bf}
+\newtheorem{lema}{Lema}
+\makeatletter\newcommand{\tabinput}[1]{\@@input #1 }\makeatother
+\input{tablas/valores.tex}
+
+\title{PGM-index\\
+\large Informe final: implementación y evaluación experimental contra índices clásicos}
+\author{Joaquín Salinas Salas \and Isaac Simeón Sarmiento \and Adrián Auqui Pérez}
+\date{17 de noviembre de 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+En el parcial nos propusimos implementar el PGM-index estático de Ferragina y Vinciguerra y
+compararlo con un B$^+$ tree y con búsqueda binaria. Queríamos saber qué tan compacto es, cómo
+influye el error $\varepsilon$ y cuándo ofrece una ventaja real. En este informe presentamos la
+implementación en C++17, explicamos sus garantías y respondemos esas preguntas con experimentos
+sobre 14 conjuntos de $10^7$ llaves, entre reales, sintéticos y patológicos. La cota
+$m\le n/(2\varepsilon)$ se cumplió siempre. En datos regulares el índice ocupa unos pocos KB, y
+con arreglos grandes ($n=10^7$) responde unas dos veces más rápido que el B$^+$. La ventaja se
+reduce en datos muy irregulares y con arreglos chicos. Además, implementamos y
+evaluamos dos versiones dinámicas del índice.
+\end{abstract}
+
+\input{secciones/intro}
+
+\input{secciones/teoria}
+
+\input{secciones/implementacion}
+
+\input{secciones/resultados}
+
+\input{secciones/discusion}
+
+\small
+\begin{thebibliography}{99}
+\setlength{\itemsep}{0pt}
+
+\bibitem{ferragina2020pgm}
+P. Ferragina y G. Vinciguerra.
+\emph{The PGM-index: a fully-dynamic compressed learned index with provable worst-case
+bounds}. PVLDB 13(8): 1162--1175, 2020.
+
+\bibitem{ferragina2019arxiv}
+P. Ferragina y G. Vinciguerra.
+\emph{The PGM-index: a multicriteria, compressed and learned approach to data indexing}.
+arXiv:1910.06169, 2019.
+
+\bibitem{kraska2018}
+T. Kraska, A. Beutel, E. H. Chi, J. Dean y N. Polyzotis.
+\emph{The Case for Learned Index Structures}. ACM SIGMOD, 489--504, 2018.
+
+\bibitem{galakatos2019}
+A. Galakatos, M. Markovitch, C. Binnig, R. Fonseca y T. Kraska.
+\emph{FITing-Tree: A Data-aware Index Structure}. ACM SIGMOD, 1189--1206, 2019.
+
+\bibitem{orourke1981}
+J. O'Rourke.
+\emph{An on-line algorithm for fitting straight lines between data ranges}.
+Communications of the ACM, 24(9): 574--578, 1981.
+
+\bibitem{xie2014}
+Q. Xie, C. Pang, X. Zhou, X. Zhang y K. Deng.
+\emph{Maximum error-bounded piecewise linear representation for online stream
+approximation}. The VLDB Journal, 23(6): 915--937, 2014.
+
+\bibitem{ferragina2020icml}
+P. Ferragina, F. Lillo y G. Vinciguerra.
+\emph{Why Are Learned Indexes So Effective?} ICML, PMLR 119: 3123--3132, 2020.
+Versión extendida en Theoretical Computer Science 871: 107--120, 2021.
+
+\bibitem{kipf2020}
+A. Kipf, R. Marcus, A. van Renen, M. Stoian, A. Kemper, T. Kraska y T. Neumann.
+\emph{RadixSpline: A Single-Pass Learned Index}. aiDM@SIGMOD, 2020.
+
+\bibitem{ding2020}
+J. Ding et al.
+\emph{ALEX: An Updatable Adaptive Learned Index}. ACM SIGMOD, 969--984, 2020.
+
+\bibitem{marcus2020}
+R. Marcus, A. Kipf, A. van Renen, M. Stoian, S. Misra, A. Kemper, T. Neumann y T. Kraska.
+\emph{Benchmarking Learned Indexes}. PVLDB 14(1): 1--13, 2020.
+
+\bibitem{tsur2025}
+E. Gæde, I. van der Hoog, E. Rotenberg y T. Stordalen.
+\emph{Dynamic Indexing Through Learned Indices with Worst-case Guarantees}.
+arXiv:2503.05007, 2025.
+
+\end{thebibliography}
+
+
+
+\end{document}
