@@ -1,0 +1,77 @@
+\section{Qué es el PGM-index y por qué funcionan sus garantías}
+\label{sec:teoria}
+
+Partimos de un arreglo ordenado $A[0..n-1]$ de llaves y de un entero $\varepsilon \ge 1$. Para
+cada llave $k$ llamamos $\mathrm{rank}(k)$ a su posición, es decir, al número de llaves menores
+que $k$. Un \emph{segmento} es una tripleta $(k_0, \text{pendiente}, \text{intercepto})$ que
+define $f(x) = \text{pendiente}\cdot(x - k_0) + \text{intercepto}$, y decimos que es
+$\varepsilon$-aproximado para un rango de llaves si $|f(k) - \mathrm{rank}(k)| \le \varepsilon$
+para todas ellas. La Figura~\ref{fig:esquema} resume cómo se organiza el índice.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  seg/.style={draw, rounded corners=1pt, minimum height=5mm, minimum width=9mm, font=\scriptsize, fill=blue!6},
+  arr/.style={-{Stealth[length=1.6mm]}, thin},
+  lbl/.style={font=\scriptsize, anchor=east}]
+  \node[seg] (r) at (5.4,2.4) {$s^{(2)}_0$};
+  \node[seg] (a0) at (3.0,1.2) {$s^{(1)}_0$};
+  \node[seg] (a1) at (5.4,1.2) {$s^{(1)}_1$};
+  \node[seg] (a2) at (7.8,1.2) {$s^{(1)}_2$};
+  \foreach \i/\x in {0/0.6,1/1.8,2/3.0,3/4.2,4/5.4,5/6.6,6/7.8,7/9.0,8/10.2}
+    \node[seg] (b\i) at (\x,0) {$s_{\i}$};
+  \draw[fill=gray!12] (0.1,-1.25) rectangle (10.7,-0.75);
+  \node[font=\scriptsize] at (2.6,-1.0) {arreglo ordenado $A$ ($n$ llaves)};
+  \foreach \t in {a0,a1,a2} \draw[arr] (r) -- (\t);
+  \foreach \t in {b0,b1,b2} \draw[arr] (a0) -- (\t);
+  \foreach \t in {b3,b4,b5} \draw[arr] (a1) -- (\t);
+  \foreach \t in {b6,b7,b8} \draw[arr] (a2) -- (\t);
+  \draw[arr, red!70!black] (b4.south) -- (5.4,-0.75);
+  \draw[red!70!black, fill=red!25] (4.85,-1.25) rectangle (5.95,-0.75);
+  \node[font=\scriptsize, red!70!black] at (7.2,-0.5) {ventana $[\mathrm{pos}-\varepsilon,\, \mathrm{pos}+\varepsilon]$};
+  \node[lbl] at (-0.2,2.4) {raíz};
+  \node[lbl] at (-0.2,1.2) {nivel 1 ($\varepsilon_{\text{rec}}$)};
+  \node[lbl] at (-0.2,0) {nivel base ($m$ seg.)};
+\end{tikzpicture}
+\caption{Estructura del PGM-index estático. Cada nivel es un PLA-model sobre las primeras llaves
+de los segmentos del nivel inferior. Una búsqueda baja evaluando una recta por nivel y termina
+con una búsqueda binaria en una ventana de tamaño $2\varepsilon+O(1)$ del arreglo.}
+\label{fig:esquema}
+\end{figure}
+
+\paragraph{PLA-model óptimo.} El problema de cubrir los puntos $(k, \mathrm{rank}(k))$ con el
+menor número $m$ de segmentos $\varepsilon$-aproximados se resuelve de forma voraz: se extiende el
+segmento actual mientras exista alguna recta que pase por todos los intervalos verticales
+$[\mathrm{rank}(k)-\varepsilon,\ \mathrm{rank}(k)+\varepsilon]$ vistos hasta ahora, y cuando deja
+de existir se empieza uno nuevo. Para decidir eso en $O(1)$ amortizado basta mantener las
+envolventes convexas superior e inferior de esos intervalos y el par de rectas extremas que
+los atraviesan (algoritmo de O'Rourke~\cite{orourke1981}, Xie et al.~\cite{xie2014}). Cada punto
+entra y sale de las envolventes a lo más una vez, así que el costo total es $O(n)$. Como el
+algoritmo voraz alarga cada segmento lo máximo posible, produce el mínimo número de segmentos.
+
+\begin{lema}
+Para todo $\varepsilon\ge 1$ se cumple $m \le \lceil n/(2\varepsilon)\rceil$.
+\end{lema}
+\paragraph{Idea de la prueba.} Tomemos cualquier bloque de $2\varepsilon$ llaves consecutivas
+con posiciones $i, \dots, i+2\varepsilon-1$. La recta horizontal $f(x) = i + \varepsilon$ se
+equivoca en a lo más $\varepsilon$ con todas ellas, así que cada bloque puede cubrirse con un
+segmento. Partir $A$ en bloques de $2\varepsilon$ da una solución factible con
+$\lceil n/(2\varepsilon)\rceil$ segmentos, y el PLA óptimo usa como máximo esa cantidad.
+
+\paragraph{Organización recursiva.} Con los $m$ segmentos del nivel base se toma la primera llave
+de cada uno y se construye otro PLA-model, ahora con un error $\varepsilon_{\text{rec}}$ (en
+nuestra implementación $\varepsilon_{\text{rec}}=4$). Se repite hasta que un nivel tiene un solo
+segmento. Aplicando el lema a cada nivel, el nivel $\ell$ tiene a lo más
+$m/(2\varepsilon_{\text{rec}})^{\ell}$ segmentos, de modo que la altura es
+$O(\log_{2\varepsilon_{\text{rec}}} m)$ y la suma de todos los niveles es una serie geométrica
+acotada por $m\cdot\frac{2\varepsilon_{\text{rec}}}{2\varepsilon_{\text{rec}}-1} = O(m)$. Por eso el
+espacio del índice, sin contar el arreglo, es $\Theta(m)$ palabras.
+
+\paragraph{Búsqueda.} En cada nivel se evalúa una recta y, como su error es a lo más
+$\varepsilon_{\text{rec}}$, el segmento correcto del nivel inferior está a $O(\varepsilon_{\text{rec}})$
+posiciones de la predicción: se encuentra en tiempo constante. En el nivel base la predicción
+está a distancia $\le\varepsilon$ de la posición real, así que basta una búsqueda binaria en una
+ventana de $2\varepsilon+O(1)$ llaves. El total es $O(\log m + \log\varepsilon)$ en el modelo
+RAM, que es lo que esperamos contrastar en la Sección~\ref{sec:resultados}. Además, cuanto más
+regulares son las separaciones entre llaves, menor es $m$: para varias distribuciones se espera
+$m = O(n/\varepsilon^{c})$ con $c>1$~\cite{ferragina2020icml}, lo que mediremos ajustando $c$.
