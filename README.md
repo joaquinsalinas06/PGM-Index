@@ -1,4 +1,4 @@
-# PGM-index y B+ tree: versión ampliada
+# PGM-index y B+ tree
 
 ## Integrantes:
 - Joaquin Mauricio Salinas Salas
@@ -8,9 +8,6 @@
 Proyecto en C++17. Requiere Clang o GCC y Make. Ejecuta `make test` para
 compilar y verificar; `make clean` elimina solamente los binarios de `build/`.
 Las pruebas usan `assert`: compilar sin `-DNDEBUG`.
-
-Esta entrega contiene algoritmos y pruebas de corrección. Los experimentos,
-datasets, gráficas y benchmarks se preparan por separado.
 
 ## Geometría
 
@@ -100,9 +97,6 @@ Por ejemplo, para `{1, 2, 3, 5000}`, `lookup(5000)` devuelve 3. Después de
 insertar 4 en el B+ dinámico devuelve 4. El PGM y el B+ estáticos deben
 reconstruirse si se modifica su vector; sus métodos no permiten insertar.
 
-Esta entrega ampliada no necesita descargas ni dependencias de Python.
-Incluye las dos extensiones dinámicas del PGM junto a la base estática.
-
 ## PGM dinámicos: dos formas de reutilizar el estático
 
 `BufferedPGM(keys, eps=64, capacity=256)` mantiene un PGM de la base y
@@ -131,7 +125,7 @@ el PGM con buffer reconstruye las seis llaves; el logarítmico coloca las dos
 nuevas en el nivel pequeño disponible. Ambos devuelven ahora 5. El B+ actualiza
 sus hojas y divide los nodos que se llenen. Los estáticos necesitan reconstruirse.
 
-### Interfaz para preparar experimentos
+### Interfaz
 
 - Estáticos: `PGMIndex(keys, eps)` y `StaticBPlusTree(keys, capacidad)`.
 - Dinámicos: `BufferedPGM`, `LogarithmicPGM` y `DynamicBPlusTree`.
@@ -149,8 +143,9 @@ sus hojas y divide los nodos que se llenen. Los estáticos necesitan reconstruir
   La variante buffered paga además una reconstrucción completa cada lote;
   no se le atribuyen los costos amortizados del método logarítmico.
 
-Los experimentos se preparan por separado. El repositorio no incluye benchmarks,
-datasets ni gráficas. Ejecuta `make test` para verificar los índices.
+`make test` verifica los índices. En `bench/`, `make results` repite los experimentos
+(los conjuntos de llaves van en `bench/data`) y `make figuras` genera las gráficas y tablas.
+El informe está en `informe/`.
 
 Los constructores estáticos rechazan vectores temporales para evitar referencias
 colgantes. Los estáticos no admiten copias, y los PGM dinámicos son propietarios

@@ -1,2 +1,9 @@
 build/
 .DS_Store
+bench/bench
+bench/data/
+informe/*.aux
+informe/*.log
+informe/*.out
+informe/*.fls
+informe/*.fdb_latexmk

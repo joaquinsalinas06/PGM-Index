@@ -1,0 +1,21 @@
+\section{Implementación}
+\label{sec:impl}
+
+Implementamos el PGM-index en C++17, sin dependencias externas, en el repositorio del
+grupo\footnote{\url{https://github.com/joaquinsalinas06/PGM-Index}}. Construimos el PLA-model
+óptimo por envolventes convexas y, sobre él, el índice estático con sus niveles recursivos. Como
+referencias de comparación implementamos un B$^+$ tree estático, construido de abajo hacia
+arriba, y uno dinámico con inserciones. Todas las estructuras responden la misma consulta: \texttt{lookup(x)}
+devuelve cuántas llaves son menores que \texttt{x}, igual que \texttt{std::lower\_bound}. Así
+pudimos verificar cada una contra esa función en \texttt{make test}. Como espacio del índice contamos los segmentos del PGM, de 16
+bytes cada uno, y los separadores y punteros internos del B$^+$. El arreglo de datos es común a
+todas las estructuras, así que no lo sumamos.
+
+\label{sec:impl-dyn}
+Además del índice estático, implementamos dos versiones dinámicas que reutilizan el PGM sin
+modificarlo. \texttt{BufferedPGM} guarda un PGM sobre la base y un
+buffer ordenado. Cuando el buffer se llena, lo fusiona con la base y reconstruye el índice.
+\texttt{LogarithmicPGM} aplica el método logarítmico del artículo
+base~\cite{ferragina2020pgm}: mantiene niveles de capacidad $\text{cap}\cdot 2^k$, cada uno con su
+PGM, que se fusionan como en un contador binario. Así inserta en $O(\log n)$ amortizado, pero
+cada búsqueda debe consultar todos los niveles.
